@@ -6,6 +6,8 @@ var feedButton,addFoodButtonButtonButton;
 var lastFed;
 var foodObj;
 var currentTime;
+var gameState;
+var roomImage,gardenImage,wsImage;
 
 function preload()
 {
@@ -13,6 +15,9 @@ function preload()
   dogImage = loadImage("images/dogImg.png");
   happyDogImage = loadImage("images/dogImg1.png");
   bowl = loadImage("images/dogfood.png")
+  roomImage = loadImage("images/Bed Room.png");
+  gardenImage = loadImage("images/Garden.png");
+  wsImage = loadImage("images/Wash Room.png")
 }
 
 function setup() {
@@ -23,6 +28,9 @@ function setup() {
   dog.scale=0.35
 
   database = firebase.database();
+
+  gameState = database.ref("GameState");
+  gameState.on("value", function(data){ gameState=data.val()})
 
   foodAmount = database.ref("Food");
   mood = database.ref("Mood");
@@ -54,16 +62,59 @@ function draw() {
   drawSprites();
   textSize(20)
   fill(0)
-  foodObj.display()
+  //foodObj.display()
+
+
+
+  if(gameState!="hungry"){
+    feedButton.hide();
+    addFoodButton.hide()
+    dog.visible=false
+  }
+  else{
+    feedButton.show();
+    addFoodButton.show()
+    dog.visible=true
+  }
+
+  currentTime = hour();
+  if(currentTime == (lastFed+1)){
+    update("playing");
+    foodObj.garden();
+  }
+  else if(currentTime == (lastFed+2)){
+    update("sleeping");
+    foodObj.bedroom();
+  }
+  else if(currentTime > (lastFed+2)&&currentTime<=(lastFed+4)){
+    update("bathing");
+    moodNormal();
+    foodObj.washroom();
+  }
+  else{
+    update("hungry");
+    
+    foodObj.display();
+
+  }
+
+
+
+
+
 
   if(foodAmount>-1){
     text ("Food Available: "+ foodAmount, 100,100 );
     
-    if(lastFed>=12){
+    if(lastFed>12){
       text("Last Fed at: "+ lastFed%12 + " PM", 600,100)
     }
     else if(lastFed==0){
       text("Last Fed at: 12 AM", 600,100)
+    }
+    else if(lastFed==12){
+      
+      text("Last Fed at: 12 PM", 600,100)
     }
     else{
       text("Last Fed at: "+ lastFed +" AM", 600,100)
@@ -72,14 +123,20 @@ function draw() {
   }
 
 
-
+/*
   if(foodAmount==0){
     
-    moodNormal();
-  }
+    
+  }*/
 
 }
 
+
+function update (state){
+
+  database.ref('/').update({
+    GameState:state});
+}
 function readAmount(data){
 
   foodAmount = data.val()
@@ -96,10 +153,10 @@ function writeAmount(x){
   )
 }
 
-function resetStock(n=54){
-  if(foodAmount<=0){
+function resetStock(n=1){
+  if(foodAmount<54){
     database.ref("Food").set(
-      n
+      foodAmount+n
     ) 
   }
   

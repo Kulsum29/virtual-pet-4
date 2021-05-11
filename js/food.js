@@ -33,4 +33,13 @@ class Food{
             }
         }
     }
+    bedroom(){
+        background(roomImage)
+    }
+    garden(){
+        background(gardenImage)
+    }
+    washroom(){
+        background(wsImage)
+    }
 }
