@@ -2,12 +2,13 @@
 var dog,dogImage;
 var database, foodAmount;
 var mood;
-var feedButton,addFoodButtonButtonButton;
+var feedButton,addFoodButton, bathButton,sleepButton,playButton,hungryButton,parkButton;
 var lastFed;
 var foodObj;
 var currentTime;
 var gameState;
-var roomImage,gardenImage,wsImage;
+var roomImage,gardenImage,wsImage,parkImage;
+var milkBottle;
 
 function preload()
 {
@@ -16,8 +17,10 @@ function preload()
   happyDogImage = loadImage("images/dogImg1.png");
   bowl = loadImage("images/dogfood.png")
   roomImage = loadImage("images/Bed Room.png");
-  gardenImage = loadImage("images/Garden.png");
-  wsImage = loadImage("images/Wash Room.png")
+  gardenImage = loadImage("images/Living Room.png");
+  parkImage = loadImage("images/Garden.png")
+  wsImage = loadImage("images/Wash Room.png");
+  milkBottle = loadImage("images/milkbottle.png")
 }
 
 function setup() {
@@ -43,13 +46,35 @@ function setup() {
   lastFed.on("value", function(data){ lastFed=data.val()})
   //saves value to lastFed
 
-  feedButton=createButton("Feed the dog");
-  feedButton.position(700,95);
+  feedButton=createButton("Feed Me!");
+  feedButton.position(700,455);
   feedButton.mousePressed(addMilkBottle);
 
   addFoodButton=createButton("Add Food");
-  addFoodButton.position(800,95);
-  addFoodButton.mousePressed(resetStock)
+  addFoodButton.position(750,95);
+  addFoodButton.mousePressed(resetStock);
+
+  bathButton =  createButton("Bathe Me");
+  bathButton.position(600,95);
+  bathButton.mousePressed(()=>update("bathing"));
+
+  sleepButton =  createButton("I'm Sleepy");
+  sleepButton.position(500,95);
+  sleepButton.mousePressed(()=>update("sleeping"));
+
+  playButton =  createButton("Let's Play");
+  playButton.position(900,95);
+  playButton.mousePressed(()=>update("playing"));
+
+  parkButton = createButton("Let's Go Out");
+  parkButton.position(1000,95);
+  parkButton.mousePressed(()=>update("digging"));
+
+  hungryButton = createButton("Now I'm Hungry...!");
+  hungryButton.position(730,75);
+  hungryButton.mousePressed(()=>update("hungry"));
+
+  hungryButton
 
   foodObj = new Food()
   currentTime=hour();
@@ -67,35 +92,50 @@ function draw() {
 
 
   if(gameState!="hungry"){
-    feedButton.hide();
+    //feedButton.hide();
     addFoodButton.hide()
+    feedButton.hide()
+    hungryButton.show()
     dog.visible=false
   }
   else{
     feedButton.show();
-    addFoodButton.show()
+    addFoodButton.show();
+    hungryButton.hide()
     dog.visible=true
   }
 
-  currentTime = hour();
-  if(currentTime == (lastFed+1)){
-    update("playing");
+ // currentTime = hour();
+  if(gameState==="playing"){
+    //update("playing");
+    moodNormal();
     foodObj.garden();
   }
-  else if(currentTime == (lastFed+2)){
-    update("sleeping");
+  else if(gameState==="sleeping"){
+    //update("sleeping");
+    moodNormal();
     foodObj.bedroom();
   }
-  else if(currentTime > (lastFed+2)&&currentTime<=(lastFed+4)){
-    update("bathing");
+  else if(gameState==="bathing"){
+    //update("bathing");
     moodNormal();
     foodObj.washroom();
+  }
+  else if(gameState==="digging"){
+    foodObj.park();
+    moodNormal();
   }
   else{
     update("hungry");
     
     foodObj.display();
 
+    if(mouseX>400){
+      dog.mirrorX(-1);
+    }
+    else{
+      dog.mirrorX(1)
+    }
   }
 
 
@@ -154,7 +194,7 @@ function writeAmount(x){
 }
 
 function resetStock(n=1){
-  if(foodAmount<54){
+  if(foodAmount<55){
     database.ref("Food").set(
       foodAmount+n
     ) 
@@ -165,10 +205,17 @@ function resetStock(n=1){
 function addMilkBottle(){
   if(foodAmount>0){
 
+    background("#663399")
+    
+    update("hungry")
     writeAmount(1);
     moodHappy();
     currentTime=hour();
-    database.ref("FeedTime").set(currentTime)
+    database.ref("FeedTime").set(currentTime);
+
+    feedButton.show();
+    addFoodButton.show()
+    dog.visible=true
   }
 
 }

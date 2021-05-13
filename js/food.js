@@ -21,17 +21,21 @@ class Food{
     }
     display(){
  
+        
         var x=10,y=450;
         if(this.foodStock!=0){
-            for (var i=0;i<this.foodStock;i++){
-                image (this.image,x,y,70,70)
+            for (var i=0;i<this.foodStock-1;i++){
+                image (milkBottle,x,y,70,70)
                 x+=40;
                 if(x==730){
                     x=10;
                     y+=70
                 }
             }
+            image(milkBottle,mouseX,mouseY,170,170)
         }
+        
+        
     }
     bedroom(){
         background(roomImage)
@@ -41,5 +45,8 @@ class Food{
     }
     washroom(){
         background(wsImage)
+    }
+    park(){
+        background(parkImage)
     }
 }
